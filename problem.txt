@@ -1,0 +1,101 @@
+So the plan would be:
+
+Build it locally in VSCode with pandas
+Migrate to Databricks with PySpark
+Add Airflow orchestration
+Document everything on GitHub
+
+If it involves rows and columns — use pandas.
+If it involves files, errors, logging, orchestration or control flow — use pure Python.
+
+
+Project: UK House Price Data Pipeline
+Data Source
+UK Land Registry Price Paid Data — free, updated monthly, no API key needed. Download from:
+http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv
+This is a real monthly update file containing every property transaction registered that month in England and Wales.
+
+Phase 1 — Local Pipeline in VSCode (pandas)
+This is where you start. Build a pipeline that processes the monthly CSV file.
+Step 1 — Ingestion
+Write a load_file(filepath: str) function that:
+
+Reads the CSV into a DataFrame — note it has no header row so you'll need to assign column names manually
+The columns are: transaction_id, price, transfer_date, postcode, property_type, old_new, duration, paon, saon, street, locality, city, district, county, ppd_category, record_status
+Logs how many records were loaded
+Handles file not found and parse errors gracefully
+
+Step 2 — Validation and cleaning
+Write a clean(df) function that:
+
+Drops rows where transaction_id, price, transfer_date, or postcode are NULL
+Drops rows where price is zero or negative
+Parses transfer_date as a proper datetime
+Standardises property_type — valid values are D (detached), S (semi-detached), T (terraced), F (flat), O (other)
+Standardises duration — valid values are F (freehold) and L (leasehold)
+Tracks rejected records with rejection reasons
+Logs counts of passed and rejected records
+
+Step 3 — Transformation
+Write a transform(df) function that adds the following derived columns:
+
+transfer_year — year extracted from transfer_date
+transfer_month — month extracted from transfer_date
+transfer_quarter — quarter extracted from transfer_date e.g. Q1, Q2
+price_band — "LOW" under £200k, "MID" £200k-£500k, "HIGH" £500k-£1m, "PREMIUM" over £1m
+is_new_build — boolean True/False based on old_new field which is Y for new build
+full_address — concatenation of paon, street, city, postcode
+
+Step 4 — Summarisation
+Write a summarise(df) function that produces a summary DataFrame with the following stats grouped by county and property_type:
+
+total_transactions
+total_volume — sum of prices
+avg_price — mean price rounded to 2 decimal places
+median_price
+min_price
+max_price
+new_build_pct — percentage of transactions that are new builds
+
+Step 5 — Save outputs
+Write a save_outputs(df, summary_df, output_dir) function that:
+
+Saves the cleaned transformed DataFrame as a parquet file — this is your first time using parquet, it's the standard format in DE
+Saves the summary DataFrame as a CSV for easy viewing
+Saves the rejected records as a JSON file for auditing
+Logs success/failure for each
+
+Step 6 — Orchestration
+Write a run_pipeline(input_filepath, output_dir) function that ties everything together with proper logging, error handling and early exit patterns — exactly as you've been doing.
+
+Phase 2 — Migrate to Databricks (PySpark)
+Once Phase 1 is working, sign up for Databricks Community Edition and migrate the pipeline:
+
+Replace pd.read_csv() with spark.read.csv()
+Replace pandas operations with PySpark equivalents
+Save outputs as Delta tables instead of parquet files
+Use the medallion architecture — raw data in bronze, cleaned data in silver, summary in gold
+
+
+Phase 3 — Airflow Orchestration
+Install Airflow locally using Docker and build a DAG that:
+
+Runs the pipeline daily
+Sends an alert if the pipeline fails
+Logs run history
+
+
+GitHub and Documentation
+Throughout the project maintain a clean GitHub repo with:
+
+A proper README.md explaining what the project does, how to run it, and the architecture
+Separate folders for each phase
+A requirements.txt file
+Sample output files
+
+
+Realistic timeline
+
+Phase 1 — 1 to 2 weeks depending on how much time you have
+Phase 2 — 1 week
+Phase 3 — 1 week
