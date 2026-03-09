@@ -12,6 +12,10 @@ import numpy as np
 # Extensibility — if you wanted a DatabricksPipeline that inherits from HousePricePipeline and overrides just the load_file and save_outputs methods, a class makes that very natural
 # Instantiation — you could run multiple pipelines with different configs simultaneously: pipeline1 = HousePricePipeline('config1.json'), pipeline2 = HousePricePipeline('config2.json')
 
+# git add .
+# git commit -m "descriptive message of what you changed"
+# git push
+
 
 # http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv
 # This is a real monthly update file containing every property transaction registered that month in England and Wales.
