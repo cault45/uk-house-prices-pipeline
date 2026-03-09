@@ -1,5 +1,9 @@
-data/
-logs/
+data/raw/*
+data/outputs/*
+logs/*
+!data/outputs/.gitkeep
+!data/raw/.gitkeep
+!logs/.gitkeep
 __pycache__/
 *.pyc
 config.json
