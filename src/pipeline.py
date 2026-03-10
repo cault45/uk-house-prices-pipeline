@@ -89,6 +89,7 @@ class HousePricePipeline:
 
         try:
             df = pd.read_csv(data_url, header=None, names=columns)
+            # df.to_parquet("data/raw/house_prices.parquet", index=False)
         except requests.exceptions.RequestException:
             self.logger.error("Unable to connect to URL")
             return None
